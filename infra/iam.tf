@@ -57,6 +57,8 @@ resource "aws_iam_policy" "github_actions_terraform_plan_policy" {
           "eks:Describe*",
           "iam:List*",
           "iam:Get*",
+          "kms:Describe*",
+          "logs:Describe*",
           "s3:List*",
           "s3:GetBucketLocation",
           "cloudformation:DescribeStacks",
