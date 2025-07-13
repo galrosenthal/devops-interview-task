@@ -37,17 +37,17 @@ jobs:
         with:
           terraform_version: 1.x # Use a compatible version, e.g., 1.x or 1.9.x
 
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
       - name: Terraform Init
         id: init
         run: terraform init
         working-directory: ${{ env.TF_WORKING_DIR }}
         # If you use a remote backend (e.g., S3), ensure your AWS credentials
         # are configured correctly before this step.
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
 
       - name: Terraform Plan
         id: plan
