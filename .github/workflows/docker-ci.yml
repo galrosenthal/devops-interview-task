@@ -30,7 +30,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: . # Build context (current directory)
+          context: ./app/ # Build context (current directory)
           file: ${{ env.DOCKER_FILE_PATH }} # Path to the Dockerfile
           push: true # Push the image to the registry
           tags: |
