@@ -68,31 +68,10 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           script: |
-            const planOutput = await github.rest.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: ${{ steps.plan.outputs.artifact_id }},
-              archive_format: 'zip'
-            });
-            const fs = require('fs');
-            const AdmZip = require('adm-zip');
-            const zip = new AdmZip(Buffer.from(planOutput.data));
-            zip.extractAllTo('/tmp', true);
-            const planText = fs.readFileSync('/tmp/terraform-plan.txt', 'utf8');
-             
-            # const output = `## Terraform Plan Verification
-            # \`terraform validate\` result: ${{ steps.validate.outcome }}
-            # \`terraform init\` result: ${{ steps.init.outcome }}
-            #
-            # \`\`\`terraform
-            # ${planText}
-            # \`\`\`
-            # `;
-
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: output
+              body: "Testing Post to PR"
             });
 
