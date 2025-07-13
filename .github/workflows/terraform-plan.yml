@@ -79,15 +79,15 @@ jobs:
             const zip = new AdmZip(Buffer.from(planOutput.data));
             zip.extractAllTo('/tmp', true);
             const planText = fs.readFileSync('/tmp/terraform-plan.txt', 'utf8');
-
-            const output = `## Terraform Plan Verification
-            \`terraform validate\` result: ${{ steps.validate.outcome }}
-            \`terraform init\` result: ${{ steps.init.outcome }}
-
-            \`\`\`terraform
-            ${planText}
-            \`\`\`
-            `;
+             
+            # const output = `## Terraform Plan Verification
+            # \`terraform validate\` result: ${{ steps.validate.outcome }}
+            # \`terraform init\` result: ${{ steps.init.outcome }}
+            #
+            # \`\`\`terraform
+            # ${planText}
+            # \`\`\`
+            # `;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
