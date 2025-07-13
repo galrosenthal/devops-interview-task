@@ -7,8 +7,8 @@ on:
   workflow_dispatch: # Allows manual triggering of the workflow
 
 env:
-  DOCKER_IMAGE_NAME: grosent/elsight_devops_flask_api # Replace with your Docker Hub username and image name
-  DOCKER_FILE_PATH: ./app/Dockerfile # Path to your Dockerfile, typically in the root of the repo
+  DOCKER_IMAGE_NAME: grosent/elsight_devops_flask_api
+  DOCKER_FILE_PATH: ./app/Dockerfile
 
 jobs:
   build_and_push:
