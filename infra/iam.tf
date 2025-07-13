@@ -1,3 +1,28 @@
+# infra/iam.tf
+
+# ------------------------------------------------------------------------------
+# IAM OpenID Connect Provider for GitHub Actions
+# This resource registers GitHub's OIDC URL with AWS, allowing AWS to trust
+# identity tokens issued by GitHub Actions. This is a one-time setup per AWS account.
+# ------------------------------------------------------------------------------
+resource "aws_iam_openid_connect_provider" "github_oidc" {
+  url = "https://token.actions.githubusercontent.com"
+
+  # The thumbprint is a hash of the root CA certificate of the OIDC provider.
+  # This value is stable for GitHub's OIDC provider.
+  # You can verify the current thumbprint by running:
+  # openssl s_client -servername token.actions.githubusercontent.com -showcerts -connect token.actions.githubusercontent.com:443 < /dev/null | openssl x509 -fingerprint -noout
+  thumbprint_list = ["6938fd485d156ee2930aa495293b5ea00037bd39"] # As of 2023-10-26, this is the current thumbprint. Verify if needed.
+
+  client_id_list = ["sts.amazonaws.com"]
+
+  tags = {
+    Project = var.project_name
+    ManagedBy = "Terraform"
+    Purpose = "GitHubActionsOIDC"
+  }
+}
+
 # ------------------------------------------------------------------------------
 # IAM Policy for GitHub Actions Terraform Plan
 # This policy grants necessary permissions for Terraform to read state from S3,
@@ -57,7 +82,7 @@ resource "aws_iam_role" "github_actions_terraform_role" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
+          Federated = aws_iam_openid_connect_provider.github_oidc.arn # Reference the created OIDC provider
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
@@ -93,3 +118,4 @@ resource "aws_iam_role_policy_attachment" "github_actions_terraform_attachment" 
 # Required for the OIDC trust policy.
 # ------------------------------------------------------------------------------
 data "aws_caller_identity" "current" {}
+
