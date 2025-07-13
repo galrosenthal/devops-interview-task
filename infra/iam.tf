@@ -55,6 +55,7 @@ resource "aws_iam_policy" "github_actions_terraform_plan_policy" {
         Action = [
           "ec2:Describe*",
           "eks:Describe*",
+          "eks:List*",
           "iam:List*",
           "iam:Get*",
           "kms:Describe*",
