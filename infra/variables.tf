@@ -57,3 +57,23 @@ variable "private_subnets_cidr" {
   type        = list(string)
   default     = ["10.0.10.0/24", "10.0.11.0/24"]
 }
+
+variable "github_repo_owner" {
+  description = "GitHub organization or user name that owns the repository"
+  type        = string
+  # IMPORTANT: Replace with your GitHub organization/user name
+  default     = "galrosenthal"
+}
+
+variable "github_repo_name" {
+  description = "GitHub repository name where the workflow will run"
+  type        = string
+  # IMPORTANT: Replace with your GitHub repository name
+  default     = "devops-interview-task"
+}
+variable "s3_backend_bucket_name" {
+  description = "Name of the S3 bucket used for Terraform state backend"
+  type        = string
+  # IMPORTANT: Default should match the bucket name in infra/backend.tf
+  default     = "devops-interview-task-bucket-dasjfh9324"
+}

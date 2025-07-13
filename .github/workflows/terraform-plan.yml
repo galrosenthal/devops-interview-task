@@ -1,0 +1,98 @@
+name: Terraform Plan Verification
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'infra/**' # Trigger only if changes are in the infra directory
+
+env:
+  TF_WORKING_DIR: ./infra # Define the working directory for Terraform commands
+
+jobs:
+  terraform_plan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC authentication with AWS
+      contents: read  # Required to checkout the repository
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # IMPORTANT: Replace with your AWS region. This should match the region
+          # where your S3 backend and EKS cluster will reside.
+          aws-region: us-east-1 # e.g., us-east-1
+          # Use OIDC for authentication. Ensure your AWS IAM role is configured
+          # to trust the GitHub OIDC provider.
+          role-to-assume: arn:aws:iam::930579047961:role/my-eks-cluster-github-actions-tf-role
+          role-session-name: GitHubActionsTerraformSession
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.x # Use a compatible version, e.g., 1.x or 1.9.x
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        # If you use a remote backend (e.g., S3), ensure your AWS credentials
+        # are configured correctly before this step.
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -input=false
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        continue-on-error: true # Allow the workflow to continue even if plan fails, to capture output
+
+      - name: Store Terraform Plan Output
+        if: always() # Always run this step, even if the plan failed
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-output
+          path: ${{ github.workspace }}/terraform-plan.txt # Save plan output to a file
+          retention-days: 1
+
+      - name: Comment on PR with Plan
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const planOutput = await github.rest.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: ${{ steps.plan.outputs.artifact_id }},
+              archive_format: 'zip'
+            });
+            const fs = require('fs');
+            const AdmZip = require('adm-zip');
+            const zip = new AdmZip(Buffer.from(planOutput.data));
+            zip.extractAllTo('/tmp', true);
+            const planText = fs.readFileSync('/tmp/terraform-plan.txt', 'utf8');
+
+            const output = `## Terraform Plan Verification
+            \`terraform validate\` result: ${{ steps.validate.outcome }}
+            \`terraform init\` result: ${{ steps.init.outcome }}
+
+            \`\`\`terraform
+            ${planText}
+            \`\`\`
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
