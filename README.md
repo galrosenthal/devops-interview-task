@@ -25,4 +25,4 @@ You have SSH access to a pre-provisioned EC2 instance where you'll perform a ser
 - Kubernetes YAMLs in `/k8s`
 - (Optional) working GitHub Actions workflow
 
-Have fun and show off your DevOps chops!
+Have fun and show off your DevOps chops!!
