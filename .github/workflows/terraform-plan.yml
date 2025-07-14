@@ -34,7 +34,7 @@ jobs:
           # Use the GitHub Secrets for Access Key ID and Secret Access Key
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          role-to-assume: arn:aws:iam::930579047961:role/my-eks-cluster-github-actions-tf-role
+          role-to-assume: arn:aws:iam::930579047961:role/gal-cluster-github-actions-tf-role
           role-session-name: GitHubActionsTerraformSession
 
       - name: Setup Terraform
