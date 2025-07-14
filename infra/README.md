@@ -1,4 +1,4 @@
-Minimal AWS EKS Cluster with Terraform
+# Minimal AWS EKS Cluster with Terraform
 This project provides a Terraform configuration to provision a minimal Amazon Elastic Kubernetes Service (EKS) cluster on AWS. It includes the necessary infrastructure components such as VPC, subnets, IAM roles, and worker nodes.
 
 Deliverables
