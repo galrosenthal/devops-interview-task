@@ -57,7 +57,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false > terraform-plan.txt
+        run: terraform plan -no-color -input=false > ${{ github.workspace }}/terraform-plan.txt
         working-directory: ${{ env.TF_WORKING_DIR }}
         continue-on-error: true # Allow the workflow to continue even if plan fails, to capture output
 
@@ -112,6 +112,6 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: "Testing Post to PR"
+              body: output
             });
 
