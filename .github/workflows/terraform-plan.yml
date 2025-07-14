@@ -74,6 +74,40 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           script: |
+            // Download the artifact containing the plan output
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId,
+            });
+            const matchArtifact = artifacts.data.artifacts.find((artifact) => artifact.name === "terraform-plan-output");
+            if (!matchArtifact) {
+              console.log("No 'terraform-plan-output' artifact found.");
+              return;
+            }
+            const download = await github.rest.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: matchArtifact.id,
+              archive_format: 'zip',
+            });
+
+            // Extract the content from the downloaded zip
+            const fs = require('fs');
+            const AdmZip = require('adm-zip');
+            const zip = new AdmZip(Buffer.from(download.data));
+            zip.extractAllTo('/tmp', true); // Extract to a temporary directory
+            const planText = fs.readFileSync('/tmp/terraform-plan.txt', 'utf8');
+
+            // Construct the comment body
+            const output = `## Terraform Plan Verification
+            \`terraform validate\` result: ${{ steps.validate.outcome }}
+            \`terraform init\` result: ${{ steps.init.outcome }}
+
+            \`\`\`terraform
+            ${planText}
+            \`\`\`
+            `;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
