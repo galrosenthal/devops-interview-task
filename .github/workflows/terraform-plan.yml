@@ -57,7 +57,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -input=false
+        run: terraform plan -no-color -input=false > terraform-plan.txt
         working-directory: ${{ env.TF_WORKING_DIR }}
         continue-on-error: true # Allow the workflow to continue even if plan fails, to capture output
 
