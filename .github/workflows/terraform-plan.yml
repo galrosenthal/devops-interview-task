@@ -69,35 +69,21 @@ jobs:
           path: ${{ github.workspace }}/terraform-plan.txt # Save plan output to a file
           retention-days: 1
 
+      - name: Download Terraform Plan Artifact
+        # This step downloads the artifact and automatically unzips it to the specified path
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan-output
+          path: ${{ github.workspace }}/downloaded-plan # Download and unzip to this directory
+
       - name: Comment on PR with Plan
         uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
         with:
           script: |
-            // Download the artifact containing the plan output
-            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.runId,
-            });
-            const matchArtifact = artifacts.data.artifacts.find((artifact) => artifact.name === "terraform-plan-output");
-            if (!matchArtifact) {
-              console.log("No 'terraform-plan-output' artifact found.");
-              return;
-            }
-            const download = await github.rest.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: matchArtifact.id,
-              archive_format: 'zip',
-            });
-
-            // Extract the content from the downloaded zip
             const fs = require('fs');
-            const AdmZip = require('adm-zip');
-            const zip = new AdmZip(Buffer.from(download.data));
-            zip.extractAllTo('/tmp', true); // Extract to a temporary directory
-            const planText = fs.readFileSync('/tmp/terraform-plan.txt', 'utf8');
+            // Read the plan text directly from the downloaded and unzipped file
+            const planText = fs.readFileSync('${{ github.workspace }}/downloaded-plan/terraform-plan.txt', 'utf8');
 
             // Construct the comment body
             const output = `## Terraform Plan Verification
@@ -108,10 +94,11 @@ jobs:
             ${planText}
             \`\`\`
             `;
+
+            // Post the comment to the Pull Request
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: output
             });
-
