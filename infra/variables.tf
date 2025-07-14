@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "project_name" {
   description = "Name of the project, used as a prefix for resources"
   type        = string
-  default     = "my-eks-cluster"
+  default     = "gal-cluster"
 }
 
 variable "cluster_version" {
