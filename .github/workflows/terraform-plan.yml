@@ -36,6 +36,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           role-to-assume: arn:aws:iam::930579047961:role/gal-cluster-github-actions-tf-role
           role-session-name: GitHubActionsTerraformSession
+          role-skip-session-tagging: true
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
